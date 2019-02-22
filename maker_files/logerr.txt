@@ -1,0 +1,14 @@
+In file included from ../../../../BitCloud/Components/HAL/cortexm0+/atsamr21/common/include/halClkCtrl.h:28:0,
+                 from ../../../../BitCloud/Components/HAL/cortexm0+/atsamr21/common/include/halUsart.h:28,
+                 from ../../../../BitCloud/Components/HAL/include/usart.h:28,
+                 from ../../include/SZ_DbgLib.h:19,
+                 from ../../src/SZ_DbgLib.c:18:
+../../../../BitCloud/Components/HAL/cortexm0+/atsamr21/common/include/atsamr21.h:189:0: warning: "LITTLE_ENDIAN" redefined
+ #define LITTLE_ENDIAN          1
+ 
+In file included from c:\program files (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\sys\types.h:67:0,
+                 from c:\program files (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\stdio.h:61,
+                 from ../../src/SZ_DbgLib.c:16:
+c:\program files (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\endian.h:17:0: note: this is the location of the previous definition
+ #define LITTLE_ENDIAN _LITTLE_ENDIAN
+ 

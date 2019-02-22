@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+		<script type="text/javascript" src="static/main.js"></script>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+		<style>
+			#progBarContainer{
+				visibility: hidden;
+			}
+			
+			#Download{
+				visibility: hidden;
+			}
+			
+			iframe {
+				display: none;
+			}
+			
+			#configOptions {
+				padding: 50px 0;
+				text-align: left;
+				background-color: lightblue;
+				margin-top: 20px;
+				margin-left: 10px;
+				margin-right: 50px;
+				visibility: hidden;
+			}
+			
+			form {
+				text-align: left;
+			}
+			
+			#channel {
+				visibility: hidden;
+			}
+			
+			#config_details_
+		</style>
+	</head>
+	<body>
+		
+		<form id="config_details" target="frame">
+		<select id="devSel" name="deviceName">Select Device:
+			<option value="0">---</option>
+			<option value="THL">THL</option>
+			<option value="DALI_Controller">DALI Controller</option>
+			<option value="WiPi">WiPi</option>
+		</select>
+	
+		<button onclick="selectDevice()">Select</button>
+
+		<div id="configOptions">
+			
+			<table id="config_details_table">
+			<tr>
+				<th><label for="chan">Select Channel Mask:</label></th>
+				<td>
+				<select id="chan" name="DEV_CHAN_MASK">
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20">20</option>
+					<option value="21">21</option>
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+					<option value="26">26</option>
+				</select>
+				</td>
+			</tr>
+			<tr>
+				<th>
+				<label for="panId">Enter extended Pan ID</label>
+				</th>
+				<td>
+				<input type="text" id="panId" name="DEV_EXT_PAN" maxlength="16"></input>
+				</td>
+			</tr>
+			<tr><td colspan=2>--------------------------------------------------------------</td></tr>
+			
+			<tr><td colspan=2>Please enter last 12 nibbles of the MAC ID range you want</td></tr>
+			
+			<tr>
+				<th>
+				<label id="macStartLabel" for="macStart">MAC Start</label>
+				</th>
+				<td>
+				<input type="text" id="macStart" name="macStart" maxlength="16"></input>
+				</td>
+			</tr>
+			
+			
+			<tr>
+				<th>
+				<label id="macEndLabel" for="macEnd">MAC End</label>
+				</th>
+				<td>
+				<input type="text" id="macEnd" name="macEnd" maxlength="16"></input>
+				</td>
+			</tr>
+			
+			</table>
+			<button id="submitForm"> Submit </button>	
+				
+			</form>
+			
+		</div>
+		<p></p>
+		<div id="progBarContainer" class="w3-light-grey">
+			<div id="progBar" class="w3-container w3-green w3-center" style="width:0%">0%</div>
+		</div><br>
+		<p></p>
+		<p></p>
+		<button id="Download">Download</button>
+		<p></p>
+		<p></p>
+		<p></p>
+		
+		<textarea id="dbgg">
+		</textarea>
+		<iframe name="frame"></iframe>
+		<script>
+			
+		</script>
+	</body>
+</html>
+
