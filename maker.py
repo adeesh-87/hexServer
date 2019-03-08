@@ -13,11 +13,15 @@ def editConfigFile(basePath, configSettings):
             xx = re.split(' ', line)
             if xx[0] == '#define':
                 cFile = cFile + xx[0] + " " + xx[1] + " "
+                if(xx[1] == "DEV_CHAN_MASK"):
+                    cFile = cFile + "(1ul<<"
                 if((xx[1] == "DEV_MAC_ID") or (xx[1] == "DEV_EXT_PAN")):
                     cFile = cFile + "0x"
                 cFile = cFile + configSettings[xx[1]] 
                 if((xx[1] == "DEV_MAC_ID") or (xx[1] == "DEV_EXT_PAN")):
                     cFile = cFile + "ull"
+                if(xx[1] == "DEV_CHAN_MASK"):
+                    cFile = cFile + ")"
                 cFile = cFile + "\n"
                 #print("conf: ", xx[1],"from ", xx[2], ' -> ', config_settings[xx[1]] )
         pConfigFile.close()
@@ -26,6 +30,7 @@ def editConfigFile(basePath, configSettings):
 
 def compileProc(basePath, configSettings, AppName, folderName):
     AppNameHex = AppName + ".hex"
+    print(AppNameHex)
     with open('logout.txt','w') as outfile, open('logerr.txt','w') as errfile:
         compileCommand = ['make', 'clean', 'all']
         compileSubProc = subprocess.Popen(compileCommand, cwd = basePath, stdout = outfile, stderr = errfile)
@@ -43,7 +48,7 @@ def worker(configSettings, basePath, folder):
     MakefileFile = basePath + '/Makefile'
     with open(MakefileFile, 'rU') as mf:
         for line in mf:
-            xx = re.split(' ', line)
+            xx = re.split(' |\n', line)
             if xx[0] == "APP_NAME":
                 AppName = xx[2]
         mf.close()
@@ -61,7 +66,7 @@ def main(generateRequest, statusUpdateCounter):
     macStart = generateRequest["macStart"]
     macEnd = generateRequest["macEnd"]
     deviceFolderPathBase = generateRequest["devFolderPath"]
-    devMacBase = configSettingsBase["DEV_MAC_ID"][0:6]
+    devMacBase = configSettingsBase["DEV_MAC_ID"][0:7]
     hexFileDestinationFolder = "executables/" + configSettingsBase["DEV_CHAN_MASK"] + "_" + configSettingsBase["DEV_EXT_PAN"]
     for key in generateRequest:
         print(generateRequest[key])
@@ -88,3 +93,4 @@ def main(generateRequest, statusUpdateCounter):
         command = ['zip', '-r', zippedFileName, zippableFolderName]
         cmdSubProc = subprocess.Popen(command, cwd = zippableFolderLocation, stdout = outfile, stderr = errfile)
         cmdSubProc.wait()
+        print("zipped")
