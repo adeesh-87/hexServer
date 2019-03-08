@@ -53,6 +53,15 @@ $(document).ready(function(){
 		}
 		return returnArray;
 	}
+	
+	
+function closeTab(){	
+	$.ajax({
+		type: "POST",
+		url: '/api/tabClosed',
+	});
+	return;
+}
 });
 
 	function refresh(){
@@ -103,12 +112,4 @@ function selectDevice() {
 		macEndBox.value = maccy.concat(projSelect.value.padStart(3,'0'));
 	});
 	
-}
-
-function closeTab(){	
-	$.ajax({
-		type: "POST",
-		url: '/api/tabClosed',
-	});
-	return;
 }
