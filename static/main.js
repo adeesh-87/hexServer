@@ -1,22 +1,49 @@
-var status = $('#status');
+//var status = $('#status');
 var maccy = "0000";
+var panBase = "0000";
+var sessionId = "";
+var tempPanBase = "";
 
 $(document).ready(function(){
-	$.get('/api/devices', function(data, status){
+	
+	var deviceSelect = document.getElementById("devSel");
+	var chSelect = document.getElementById("chan");
+	var projSelect = document.getElementById("project_select");
+	// should not use plurals like devices, should be device singular
+	$.get('/device/', function(data, status){
+		var cfInit = JSON.parse(data);
+		//console.log(devices);
+		var devices = cfInit["devicelist"].split(',');
+		for (d in devices){
+			//console.log(devices[d]);
+			var option = document.createElement("option");
+			option.value = devices[d];
+			option.text = devices[d];
+			deviceSelect.add(option);
+		}
 		
+		var channels = cfInit["GlobalConfigOptions"]["channel_masks"].split(',');
+		for (ch in channels){
+			var option = document.createElement("option");
+			option.value = channels[ch];
+			option.text = channels[ch];
+			chSelect.add(option);
+		}
+		
+		var projects = cfInit["project_codes"]
+		for (key in projects){
+			var option = document.createElement("option");
+			option.value = projects[key];
+			option.text = key;
+			projSelect.add(option);
+		}
+		
+		panBase = cfInit["GlobalConfigOptions"]["extended_pan_base"];
+		tempPanBase = panBase;
+		//console.log(channels);
 	});
 	
-	$("#submitForm").click(function() {
-		document.getElementById("progBarContainer").style.visibility = "visible";
-		document.getElementById("progBar").style.visibility = "visible";
 
-		var fData = $("#config_details").serialize();
-		 $.ajax({
-			url: '/api/submitform',
-			type: 'POST',
-			data: JSON.stringify(fData)
-		});
-	});
 
 	function objectifyForm(formArray) {//serialize data function
 
@@ -26,6 +53,7 @@ $(document).ready(function(){
 		}
 		return returnArray;
 	}
+});
 
 	function refresh(){
 		$.get('/api/statusUpdate', function(data, status){
@@ -38,36 +66,43 @@ $(document).ready(function(){
 		});
 			
 	}
-});
 	
 function selectDevice() {
+	
+	panBase = tempPanBase;
 	var devSelBox = document.getElementById("devSel");
-	if(devSelBox.selectedIndex){
-		
+	//var devDetails;
+	var projSelect = document.getElementById("project_select");
+	var fixedPan = document.getElementById("fixedPan");
+	var getReq = '/device/'.concat(devSelBox.value);
+	panBase = panBase.concat(projSelect.value.padStart(3,'0'));
+	fixedPan.innerHTML = panBase;
+	fixedPan.value = panBase;
+	console.log(getReq);
+	$.get(getReq, function(data, status){
+		console.log(data);
+		var devDetails = JSON.parse(data);
+		//console.log(devDetails);
 		var dbgBox = document.getElementById("dbgg");
-		var macStartBox = document.getElementById("macStart");
-		var macEndBox = document.getElementById("macEnd");
-		
+		var macStartBox = document.getElementById("macStartBase");
+		var macEndBox = document.getElementById("macEndBase");
+		var devVersions = document.getElementById("versions");
 		document.getElementById("configOptions").style.visibility = "visible";
 		document.getElementById("config_details").style.visibility = "visible";
-		
-		switch(devSelBox.selectedIndex){
-		case 1:
-			maccy = "5003";
-		break;
-		
-		case 2:
-			maccy = "50DC";
-		break;
-		
-		case 3:
-			maccy = "5001";
-		break;
+		maccy = devDetails["macbase"];
+		var dVersions = devDetails["versions"].split(',');
+		for (ver in dVersions){
+			var option = document.createElement("option");
+			option.value = dVersions[ver];
+			option.text = dVersions[ver];
+			devVersions.add(option);
 		}
-		
-		macStartBox.value = maccy;
-		macEndBox.value = maccy;
-	}
+		macStartBox.innerHTML = maccy.concat(projSelect.value.padStart(3,'0'));
+		macStartBox.value = maccy.concat(projSelect.value.padStart(3,'0'));
+		macEndBox.innerHTML = maccy.concat(projSelect.value.padStart(3,'0'));
+		macEndBox.value = maccy.concat(projSelect.value.padStart(3,'0'));
+	});
+	
 }
 
 function closeTab(){	

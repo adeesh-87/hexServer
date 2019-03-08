@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta name="google-signin-scope" content="profile email">
+		<meta name="google-signin-client_id" content="597205692648-odmf1iggl3c7nul3469ctchmtocanbrv.apps.googleusercontent.com">
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 		<script type="text/javascript" src="static/main.js"></script>
 		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 		<style>
+			.g-signin2{
+				height:20%;
+				width:20%;
+				margin: 0 auto;
+			}
+			
+			#mainPage {
+				display: none;
+			}
+			
 			#progBarContainer{
 				visibility: hidden;
 			}
@@ -36,100 +50,171 @@
 				visibility: hidden;
 			}
 			
-			#config_details_
+			#selection{
+				padding: 1%;
+			}
 		</style>
 	</head>
 	<body>
-		
-		<form id="config_details" target="frame">
-		<select id="devSel" name="deviceName">Select Device:
-			<option value="0">---</option>
-			<option value="THL">THL</option>
-			<option value="DALI_Controller">DALI Controller</option>
-			<option value="WiPi">WiPi</option>
-		</select>
-	
-		<button onclick="selectDevice()">Select</button>
+		<div id="signin" class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    
 
-		<div id="configOptions">
+		<div id="mainPage">
 			
-			<table id="config_details_table">
-			<tr>
-				<th><label for="chan">Select Channel Mask:</label></th>
-				<td>
-				<select id="chan" name="DEV_CHAN_MASK">
-					<option value="11">11</option>
-					<option value="12">12</option>
-					<option value="13">13</option>
-					<option value="14">14</option>
-					<option value="15">15</option>
-					<option value="16">16</option>
-					<option value="17">17</option>
-					<option value="18">18</option>
-					<option value="19">19</option>
-					<option value="20">20</option>
-					<option value="21">21</option>
-					<option value="22">22</option>
-					<option value="23">23</option>
-					<option value="24">24</option>
-					<option value="25">25</option>
-					<option value="26">26</option>
+				<button onclick="selectDevice()">Select</button>
+			<form id="config_details" method="post" target="#">
+			
+			<div id="selection">
+				<label for="project">Select Project: </label>
+				<select id="project_select">
+					<option value="0">---</option>
 				</select>
-				</td>
-			</tr>
-			<tr>
-				<th>
-				<label for="panId">Enter extended Pan ID</label>
-				</th>
-				<td>
-				<input type="text" id="panId" name="DEV_EXT_PAN" maxlength="16"></input>
-				</td>
-			</tr>
-			<tr><td colspan=2>--------------------------------------------------------------</td></tr>
-			
-			<tr><td colspan=2>Please enter last 12 nibbles of the MAC ID range you want</td></tr>
-			
-			<tr>
-				<th>
-				<label id="macStartLabel" for="macStart">MAC Start</label>
-				</th>
-				<td>
-				<input type="text" id="macStart" name="macStart" maxlength="16"></input>
-				</td>
-			</tr>
-			
-			
-			<tr>
-				<th>
-				<label id="macEndLabel" for="macEnd">MAC End</label>
-				</th>
-				<td>
-				<input type="text" id="macEnd" name="macEnd" maxlength="16"></input>
-				</td>
-			</tr>
-			
-			</table>
-			<button id="submitForm"> Submit </button>	
 				
-			</form>
+				<label for="device">Select Device: </label>
+				<select id="devSel" name="deviceName">
+					<option value="0">---</option>
+				</select><br><br>
 			
+			</div>
+
+			<div id="configOptions">
+				
+				<table id="config_details_table">
+				<tr>
+					<th><label for="chan">Select Channel Mask:</label></th>
+					<td>
+					<select align="right" id="chan" name="DEV_CHAN_MASK">
+					</select>
+					</td>
+				</tr>
+				<tr>
+					<th>Code version: </th>
+					<td>
+					<select align="right" id="versions" name="DEV_VERSION">
+					</select>
+					</td>
+				</tr>
+				<tr><td colspan=3>--------------------------------------------------------------------</td></tr>
+				
+				<tr><td colspan=3>Please enter last 9 nibbles of the following device fields </td></tr>
+				
+				<tr>
+				<tr>
+					<th>
+					<label for="panId">Extended Pan ID: </label>
+					</th>
+					<td id="fixedPan" align="right"></td>
+					<td>
+					<input type="text" id="panId" name="DEV_EXT_PAN" maxlength="9"></input>
+					</td>
+				</tr>
+					<th>
+					<label id="macStartLabel" for="macStart">MAC Start</label>
+					</th>
+					<td id="macStartBase" align="right"></td>
+					<td>
+					<input type="text" id="macStart" name="macStart" maxlength="9"></input>
+					</td>
+				</tr>
+				
+				
+				<tr>
+					<th>
+					<label id="macEndLabel" for="macEnd">MAC End</label>
+					</th>
+					<td id="macEndBase" align="right"></td>
+					<td>
+					<input type="text" id="macEnd" name="macEnd" maxlength="9"></input>
+					</td>
+				</tr>
+				
+				</table>
+				<input type="submit" id="submitForm" value="Submit"/>
+					
+				</form>
+				
+			</div>
+			<p></p>
+			<div id="progBarContainer" class="w3-light-grey">
+				<div id="progBar" class="w3-container w3-green w3-center" style="width:0%">0%</div>
+			</div><br>
+			<p></p>
+			<p></p>
+			<button id="Download">Download</button>
+			<p></p>
+			<p></p>
+			<a href="#" onclick="signOut();">Sign out</a>
+			<script>
+			  function signOut() {
+				var auth2 = gapi.auth2.getAuthInstance();
+				auth2.signOut().then(function () {
+				  console.log('User signed out.');
+				});
+			  }
+			</script>
+
+			<p></p>
+			
+			<textarea id="dbgg">
+			</textarea>
+			<!--iframe name="frame"></iframe-->
 		</div>
-		<p></p>
-		<div id="progBarContainer" class="w3-light-grey">
-			<div id="progBar" class="w3-container w3-green w3-center" style="width:0%">0%</div>
-		</div><br>
-		<p></p>
-		<p></p>
-		<button id="Download">Download</button>
-		<p></p>
-		<p></p>
-		<p></p>
-		
-		<textarea id="dbgg">
-		</textarea>
-		<iframe name="frame"></iframe>
 		<script>
+			function onSignIn(googleUser) {
+				var pp = document.getElementById("signin").style.display = "none";
+				var gg = document.getElementById("mainPage").style.display = "block";
+				// Useful data for your client-side scripts:
+				var profile = googleUser.getBasicProfile();
+				//console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+				//console.log('Full Name: ' + profile.getName());
+				//console.log('Given Name: ' + profile.getGivenName());
+				//console.log('Family Name: ' + profile.getFamilyName());
+				//console.log("Image URL: " + profile.getImageUrl());
+				console.log("Email: " + profile.getEmail());
+				
+				$.ajax({
+					url: '/api/sessionId',
+					type: 'POST',
+					data: JSON.stringify({email : profile.getEmail()}),
+					success: function(data){
+						alert(data);
+					}
+				});
+				// The ID token you need to pass to your backend:
+				//var id_token = googleUser.getAuthResponse().id_token;
+				//console.log("ID Token: " + id_token);
+			}
 			
+			$("#config_details").submit(function(e) {
+			e.preventDefault();
+			var pp = document.getElementById("project_select");
+			document.getElementById("progBarContainer").style.visibility = "visible";
+			document.getElementById("progBar").style.visibility = "visible";
+			var fData = $("#config_details").serialize();
+			var mStart = document.getElementById("macStart");
+			//mStart.value = document.getElementById("macStartBase").value.concat(mStart.value);
+			var mEnd = document.getElementById("macEnd");
+			//mEnd.value = document.getElementById("macEndBase").value.concat(mEnd.value);
+			var extPan = document.getElementById("panId");
+			//extPan.value = panBase.concat(extPan.value);
+			var ffD = {
+			"macStart" : mStart.value,
+			"macEnd" : (mEnd.value),
+			"DEV_EXT_PAN" : panBase.concat(extPan.value),
+			"deviceName" : document.getElementById("devSel").value,
+			"project" : pp.value,
+			"DEV_VERSION" : document.getElementById("versions").value,
+			"DEV_CHAN_MASK" : document.getElementById("chan").value,
+			"projName" : pp.options[pp.selectedIndex].text
+			};
+			console.log(ffD);
+			$.ajax({
+				url: '/api/generate',
+				type: 'POST',
+				data: JSON.stringify(ffD)
+			});
+			refresh();
+	});
 		</script>
 	</body>
 </html>

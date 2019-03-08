@@ -63,6 +63,8 @@ def main(generateRequest, statusUpdateCounter):
     deviceFolderPathBase = generateRequest["devFolderPath"]
     devMacBase = configSettingsBase["DEV_MAC_ID"][0:6]
     hexFileDestinationFolder = "executables/" + configSettingsBase["DEV_CHAN_MASK"] + "_" + configSettingsBase["DEV_EXT_PAN"]
+    for key in generateRequest:
+        print(generateRequest[key])
     with open('logout.txt','w') as outfile, open('logerr.txt','w') as errfile:
         command = ['mkdir', hexFileDestinationFolder]
         cmdSubProc = subprocess.Popen(command, cwd = deviceFolderPathBase, stdout = outfile, stderr = errfile)

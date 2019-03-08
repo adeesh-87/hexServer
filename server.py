@@ -10,25 +10,34 @@ import threading
 import json
 import maker
 import re
+import configparser
+import random
 
 clients = []
 running = 0
 
+sessionIdGlobal = multiprocessing.Value('i', 0)
 statusUpdateIndicator = multiprocessing.Value('i',1)
 generateRequestQueue = multiprocessing.Queue()
 
+codebaseConfig = configparser.ConfigParser()
+
+'''
 configOSettings = {
     "DEV_MAC_ID": "50DC000000000000",
     "DEV_EXT_PAN": "6000000000000000",
     "DEV_CHAN_MASK": "26"
 }
 generateRequest = {
+    "sessionId": 0,
+    "projName":"intel",
     "confBase":configOSettings,
     "macStart": 1206,
     "macEnd": 1209,
     "devFolderPath": "../../BC3_3_SAMR21_Applications/Codebase/Applications/SZ_Dali_Master_Dev"
-}
 
+}
+'''
 def getStatus():
     global statusUpdateIndicator
     print('statusUp: ',statusUpdateIndicator.value)    
@@ -36,6 +45,10 @@ def getStatus():
 
 
 class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("login_page.html")
+
+class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
@@ -59,51 +72,84 @@ class generate_files(multiprocessing.Process):
         global running
         while running:
             if not generateRequestQueue.empty():
-                currentConfig = generateRequestQueue.get()
-                maker.main(generateRequest, self.statusUpdateCtr)
+                genReq = generateRequestQueue.get()
+                maker.main(genReq, self.statusUpdateCtr)
             time.sleep(1)
 
         
-class RequestHandler(tornado.web.RequestHandler):
-    
+class DeviceHandler(tornado.web.RequestHandler):
+   
     def get(self, endPoint):
+        #global configOsettings
+        #global generateRequest
         print("endPoint GET: ", endPoint)
-        self.write(str(getStatus()))
+        if(endPoint == None):
+            print(codebaseConfig["DEVICES"]["devicelist"])
+            cfInit = {}
+            cfInit["devicelist"] = codebaseConfig["DEVICES"]["devicelist"]
+            cfInit["project_codes"] = {}
+            for key in codebaseConfig['PROJECT_CODES']:
+                cfInit["project_codes"][key] = codebaseConfig["PROJECT_CODES"][key]
+            cfInit["GlobalConfigOptions"] = {}   
+            for key in codebaseConfig["GlobalConfigOptions"]:
+                cfInit["GlobalConfigOptions"][key] = codebaseConfig["GlobalConfigOptions"][key]
+            self.write(json.dumps(cfInit))
+        else:
+            devDump = {}
+            devDump["macbase"] = codebaseConfig[endPoint]["macbase"]
+            devDump["versions"] = codebaseConfig[endPoint]["versions"]
+            #configOsettings["devFolderPath"] = codebaseConfig[endPoint]["codepath"]
+            self.write(json.dumps(devDump))
+        #self.write(str(getStatus()))
 
     
     def post(self, endPoint):
         print("endPoint POST: ", endPoint)
-        
-        print("[*] Config form submitted")
-        
-        configForm = {}
-        form_data = json.loads(self.request.body.decode("utf-8"))
-        #form_data = json.loads(self.request.body.decode("utf-8"))
-        form_data_temp = re.split('\&',form_data)
-        for cf in form_data_temp:
-            configForm[re.split('=',cf)[0]] = re.split('=',cf)[1]
-        #form_data = re.split('=',form_data2)
-        #print(configForm)
-        generateRequest["macStart"]      = configForm["macStart"]
-        generateRequest["macEnd"]        = configForm["macEnd"]
-        #configOSettings["DEV_MAC_ID"]    = configForm["DEV_MAC_ID"]
-        configOSettings["DEV_EXT_PAN"]   = configForm["DEV_EXT_PAN"]
-        configOSettings["DEV_CHAN_MASK"] = configForm["DEV_CHAN_MASK"]
-        for key in generateRequest:
-            print(key, generateRequest[key])
-	    
-        #generateRequestQueue.put(generateRequest)
+
+class APIHandler(tornado.web.RequestHandler):
+    def get(self, endPoint):
+        print("endPoint GET: ", endPoint)
         
 
-    def getDeviceConfig(self):
-        return
-    
+    def post(self, endPoint):
+        
+        print("endPoint POST: ", endPoint)
+        if endPoint == "generate":
+            print("[*] Config form submitted")
+            
+            configForm = {}
+            generateRequest = {}
+            configOSettings = {}
+            generateRequest["confBase"] = configOSettings
+            configForm = json.loads(self.request.body.decode("utf-8"))
+            proj = configForm["project"]
+            if proj == None:
+                proj = "0"
+            configOSettings["DEV_MAC_ID"]    = codebaseConfig[configForm["deviceName"]]["macbase"] + proj.zfill(3)
+            generateRequest["macStart"]      = int(configForm["macStart"])
+            generateRequest["macEnd"]        = int(configForm["macEnd"])
+            generateRequest["projName"]      = configForm["projName"]
+            configOSettings["DEV_EXT_PAN"]   = configForm["DEV_EXT_PAN"]
+            configOSettings["DEV_CHAN_MASK"] = configForm["DEV_CHAN_MASK"]
+            deviceName                       = configForm["deviceName"]
+            generateRequest["devFolderPath"] = codebaseConfig[deviceName]["codepath"]
+            for key in generateRequest:
+                print(key, generateRequest[key])
+            generateRequestQueue.put(generateRequest)
+            
+        elif endPoint == "sessionId":
+            print(json.loads(self.request.body.decode("utf-8")))
+            rr = random.randint(1000,9999)
+            sessionIdGlobal.value = rr
+            self.write(str(sessionIdGlobal.value))
 def make_app():
 
     return tornado.web.Application([
-        (r"/", MainHandler),
+        (r"/", IndexHandler),
         #(r"/statusUpdate", status_update),
-        (r"/api/([a-zA-Z]+)?", RequestHandler),
+        (r"/device/([a-zA-Z]+)?", DeviceHandler),
+        (r"/api/([a-zA-Z]+)?", APIHandler),
+        #(r"/device", DeviceHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path':  './static'}),
         
     ], debug=False)
@@ -111,8 +157,10 @@ def make_app():
 
 
 if __name__ == "__main__":
+    random.seed(a=None)
     #global bablu
-    
+    codebaseConfig.sections()
+    codebaseConfig.read('../../codebase_configuration.cfg')
     gg = generate_files(statusUpdateIndicator)
     gg.daemon = True
     gg.start()
