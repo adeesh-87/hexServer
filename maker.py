@@ -94,3 +94,8 @@ def main(generateRequest, statusUpdateCounter):
         cmdSubProc = subprocess.Popen(command, cwd = zippableFolderLocation, stdout = outfile, stderr = errfile)
         cmdSubProc.wait()
         print("zipped")
+    with open('logout.txt','w') as outfile, open('logerr.txt','w') as errfile:
+        command = ['mv', zippedFileName, "../../../../CIS/hexServer/download/"]
+        cmdSubProc = subprocess.Popen(command, cwd = zippableFolderLocation, stdout = outfile, stderr = errfile)
+        cmdSubProc.wait()
+        print("zipped")

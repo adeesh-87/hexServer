@@ -3,7 +3,7 @@ var maccy = "0000";
 var panBase = "0000";
 var sessionId = "";
 var tempPanBase = "";
-
+var fName = "";
 $(document).ready(function(){
 	
 	var deviceSelect = document.getElementById("devSel");
@@ -43,8 +43,7 @@ $(document).ready(function(){
 		//console.log(channels);
 	});
 	
-
-
+	
 	function objectifyForm(formArray) {//serialize data function
 
 		var returnArray = {};
@@ -71,11 +70,31 @@ function closeTab(){
 			document.getElementById("progBar").innerHTML = parseInt(`${data}`)*1 + '%';
 			if(parseInt(`${data}`) < 100){	
 				setTimeout(refresh, 5000);
+			}
+			if(parseInt(`${data}`) === 100){
+				document.getElementById('Download').style.visibility = 'visible';
+				$.get('/api/fileName', function(data, status){
+					console.log("file name: "+data);
+					fName = data;
+					var newurl = "download/"+fName;
+					$('#Download').attr('href', newurl);				
+				});
 			}				
 		});
-			
 	}
-	
+
+
+$("#Download").click(function(e){
+	e.preventDefault();
+	console.log("file name: "+fname);
+	let name = "download/" +fname 
+	$("#Download").attr("href",name);
+	// $.ajax({
+	// 	type: "POST",
+	// 	url: '/download/package.zip',
+	// });
+});
+
 function selectDevice() {
 	
 	panBase = tempPanBase;

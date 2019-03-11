@@ -107,12 +107,20 @@ class DeviceHandler(tornado.web.RequestHandler):
         print("endPoint POST: ", endPoint)
 
 class APIHandler(tornado.web.RequestHandler):
+    fileName=""
     def get(self, endPoint):
+        global fileName
         print("endPoint GET: ", endPoint)
-        
+        if endPoint == "statusUpdate":
+            self.write(str(statusUpdateIndicator.value))
+
+        elif endPoint == "fileName":
+            self.write(fileName)
+            #with open(fileName, 'rb') as f:
+                #self.write(f)
 
     def post(self, endPoint):
-        
+        global fileName
         print("endPoint POST: ", endPoint)
         if endPoint == "generate":
             print("[*] Config form submitted")
@@ -133,6 +141,7 @@ class APIHandler(tornado.web.RequestHandler):
             configOSettings["DEV_CHAN_MASK"] = configForm["DEV_CHAN_MASK"]
             deviceName                       = configForm["deviceName"]
             generateRequest["devFolderPath"] = codebaseConfig[deviceName]["codepath"]
+            fileName = configOSettings["DEV_CHAN_MASK"]+"_"+configOSettings["DEV_EXT_PAN"]+".zip"
             for key in generateRequest:
                 print(key, generateRequest[key])
             generateRequestQueue.put(generateRequest)
@@ -151,7 +160,7 @@ def make_app():
         (r"/api/([a-zA-Z]+)?", APIHandler),
         #(r"/device", DeviceHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path':  './static'}),
-        
+        (r"/download/(.*)", tornado.web.StaticFileHandler, {'path':  './download'}),
     ], debug=False)
 
 
@@ -160,7 +169,7 @@ if __name__ == "__main__":
     random.seed(a=None)
     #global bablu
     codebaseConfig.sections()
-    codebaseConfig.read('../../codebase_configuration.cfg')
+    codebaseConfig.read('../CIS/codebase_configuration.cfg')
     gg = generate_files(statusUpdateIndicator)
     gg.daemon = True
     gg.start()
