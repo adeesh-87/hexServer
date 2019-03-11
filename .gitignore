@@ -137,4 +137,8 @@ dmypy.json
 pyvenv.cfg
 pip-selfcheck.json
 
+#Ignore zip files
+*.zip
+download/
+
 # End of https://www.gitignore.io/api/python
