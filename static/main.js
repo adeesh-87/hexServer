@@ -4,18 +4,18 @@ var panBase = "0000";
 var sessionId = "";
 var tempPanBase = "";
 var fName = "";
+
 $(document).ready(function(){
 	
 	var deviceSelect = document.getElementById("devSel");
 	var chSelect = document.getElementById("chan");
 	var projSelect = document.getElementById("project_select");
-	// should not use plurals like devices, should be device singular
-	$.get('/device/', function(data, status){
+	
+	
+	$.get('/device/', function(data){
 		var cfInit = JSON.parse(data);
-		//console.log(devices);
 		var devices = cfInit["devicelist"].split(',');
 		for (d in devices){
-			//console.log(devices[d]);
 			var option = document.createElement("option");
 			option.value = devices[d];
 			option.text = devices[d];
@@ -40,7 +40,6 @@ $(document).ready(function(){
 		
 		panBase = cfInit["GlobalConfigOptions"]["extended_pan_base"];
 		tempPanBase = panBase;
-		//console.log(channels);
 	});
 	
 	
@@ -54,18 +53,17 @@ $(document).ready(function(){
 	}
 	
 	
-function closeTab(){	
-	$.ajax({
-		type: "POST",
-		url: '/api/tabClosed',
-	});
-	return;
-}
+	function closeTab(){	
+		$.ajax({
+			type: "POST",
+			url: '/api/tabClosed',
+		});
+		return;
+	}
 });
 
 	function refresh(){
-		$.get('/api/statusUpdate', function(data, status){
-			console.log(`${data}`)
+		$.get('/api/statusUpdate', function(data){
 			document.getElementById("progBar").style.width = parseInt(`${data}`) + '%';
 			document.getElementById("progBar").innerHTML = parseInt(`${data}`)*1 + '%';
 			if(parseInt(`${data}`) < 100){	
@@ -73,8 +71,7 @@ function closeTab(){
 			}
 			if(parseInt(`${data}`) === 100){
 				document.getElementById('Download').style.visibility = 'visible';
-				$.get('/api/fileName', function(data, status){
-					console.log("file name: "+data);
+				$.get('/api/fileName', function(data){
 					fName = data;
 					var newurl = "download/"+fName;
 					$('#Download').attr('href', newurl);				
@@ -89,14 +86,10 @@ $("#Download").click(function(e){
 	console.log("file name: "+fname);
 	let name = "download/" +fname 
 	$("#Download").attr("href",name);
-	// $.ajax({
-	// 	type: "POST",
-	// 	url: '/download/package.zip',
-	// });
 });
 
-function selectDevice() {
-	
+
+function selectDevice() {	
 	panBase = tempPanBase;
 	var devSelBox = document.getElementById("devSel");
 	//var devDetails;
@@ -110,7 +103,6 @@ function selectDevice() {
 	$.get(getReq, function(data, status){
 		console.log(data);
 		var devDetails = JSON.parse(data);
-		//console.log(devDetails);
 		var dbgBox = document.getElementById("dbgg");
 		var macStartBox = document.getElementById("macStartBase");
 		var macEndBox = document.getElementById("macEndBase");

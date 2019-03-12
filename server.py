@@ -1,15 +1,8 @@
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
-import tornado.gen
-from tornado.options import define, options
-import os
+from tornado import web,ioloop
 import time
 import multiprocessing
-import threading
 import json
 import maker
-import re
 import configparser
 import random
 
@@ -35,7 +28,6 @@ generateRequest = {
     "macStart": 1206,
     "macEnd": 1209,
     "devFolderPath": "../../BC3_3_SAMR21_Applications/Codebase/Applications/SZ_Dali_Master_Dev"
-
 }
 '''
 def getStatus():
@@ -44,15 +36,15 @@ def getStatus():
     return statusUpdateIndicator.value
 
 
-class MainHandler(tornado.web.RequestHandler):
+class MainHandler(web.RequestHandler):
     def get(self):
         self.render("login_page.html")
 
-class IndexHandler(tornado.web.RequestHandler):
+class IndexHandler(web.RequestHandler):
     def get(self):
         self.render("index.html")
 
-class StaticFileHandler(tornado.web.RequestHandler):
+class StaticFileHandler(web.RequestHandler):
     def get(self):
         self.render('static/main.js')
 
@@ -77,7 +69,7 @@ class generate_files(multiprocessing.Process):
             time.sleep(1)
 
         
-class DeviceHandler(tornado.web.RequestHandler):
+class DeviceHandler(web.RequestHandler):
    
     def get(self, endPoint):
         #global configOsettings
@@ -106,7 +98,7 @@ class DeviceHandler(tornado.web.RequestHandler):
     def post(self, endPoint):
         print("endPoint POST: ", endPoint)
 
-class APIHandler(tornado.web.RequestHandler):
+class APIHandler(web.RequestHandler):
     fileName=""
     def get(self, endPoint):
         global fileName
@@ -151,16 +143,18 @@ class APIHandler(tornado.web.RequestHandler):
             rr = random.randint(1000,9999)
             sessionIdGlobal.value = rr
             self.write(str(sessionIdGlobal.value))
+
+
 def make_app():
 
-    return tornado.web.Application([
+    return web.Application([
         (r"/", IndexHandler),
         #(r"/statusUpdate", status_update),
         (r"/device/([a-zA-Z]+)?", DeviceHandler),
         (r"/api/([a-zA-Z]+)?", APIHandler),
         #(r"/device", DeviceHandler),
-        (r"/static/(.*)", tornado.web.StaticFileHandler, {'path':  './static'}),
-        (r"/download/(.*)", tornado.web.StaticFileHandler, {'path':  './download'}),
+        (r"/static/(.*)", web.StaticFileHandler, {'path':  './static'}),
+        (r"/download/(.*)", web.StaticFileHandler, {'path':  './download'}),
     ], debug=False)
 
 
@@ -176,5 +170,5 @@ if __name__ == "__main__":
     app = make_app()
     app.listen(8888)
     print("Server started")
-    tornado.ioloop.IOLoop.current().start()
+    ioloop.IOLoop.current().start()
     
